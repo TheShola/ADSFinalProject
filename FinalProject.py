@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import math 
 
 '''Part 1 of Final Project'''
 '''API command used to get data'''
@@ -243,6 +244,57 @@ plt.xlabel('Months')
 plt.ylabel('Value of Turkeys ')
 plt.title("Line plots for value(how many turkeys in each month) of each months btw 2009 - 2018")
 
+
+
+# part3
+
+# extract the required columns
+df_turkeys = pd.read_csv('download.csv')
+part3_df = df_turkeys[df_turkeys["year"] == 2017]
+part3_df = part3_df[["year", "Value", "reference_period_desc"]].reset_index(drop=True)
+part3_df["X"] = part3_df.index
+part3_df = part3_df[part3_df["X"]>0]
+
+# convert value type from string to int
+part3_df = convert_value(part3_df)
+
+# calculate the required metrices
+corr_x_y = part3_df['X'].corr(part3_df['New_Value'])
+sd_x = math.sqrt(part3_df['X'].var())
+sd_y = math.sqrt(part3_df['New_Value'].var())
+mean_y = part3_df['New_Value'].mean()
+mean_x = part3_df['X'].mean()
+
+beta = (corr_x_y * sd_y)/sd_x
+print("value of beta is: ", beta)
+print()
+alpha = mean_y - beta * mean_x
+print("value of alpha is: ", alpha)
+print()
+
+# predicted vale for nov 2017
+p_val = beta*11 + alpha
+print("predicted value for november is: ", p_val)
+print()
+print("absolute error between your predicted value and the actual value of turkeys slaughtered in Virginia in Nov 2017 is: ", abs(p_val - part3_df["New_Value"][11]))
+print()
+
+
+# calculate the required metrices for Coefficient of Determination
+SSE_list = [(part3_df['New_Value'][i] - (beta*i + alpha))**2 for i in range(1,11)]
+SSE = sum(SSE_list)
+SSTO = sum([(part3_df['New_Value'][i] - mean_y)**2 for i in range(1,11)])
+r_2 = 1-(SSE/SSTO)
+
+print("Coefficient of Determination is: ", r_2)
+
+#plot real vs expected graph
+predicted_vals = [(beta*i + alpha) for i in range(1,13)]
+part3_df["new_Y"] = predicted_vals
+part3_df.plot("X", ["New_Value", "new_Y"])
+
+
 plt.show()
+
 
 
