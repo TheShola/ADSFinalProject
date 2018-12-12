@@ -2,4 +2,4 @@
 
 
 Clone repo or download
-Run python 
+Run python FinalProject.py in terminal
